@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn — Three-Tier Architecture Design</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0d0f14;
+  --surface:  #131720;
+  --border:   #232838;
+  --muted:    #3d4560;
+
+  --t1:       #4fc3f7;   /* Presentation tier — sky blue */
+  --t1-dim:   rgba(79,195,247,.08);
+  --t1-glow:  rgba(79,195,247,.25);
+
+  --t2:       #a8edac;   /* Application tier — sage green */
+  --t2-dim:   rgba(168,237,172,.08);
+  --t2-glow:  rgba(168,237,172,.22);
+
+  --t3:       #f9a96e;   /* Data tier — warm amber */
+  --t3-dim:   rgba(249,169,110,.08);
+  --t3-glow:  rgba(249,169,110,.22);
+
+  --accent:   #0a66c2;
+  --white:    #eef0f5;
+  --mid:      #8892ab;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  padding: 48px 64px 0;
+  position: relative;
+}
+.header-eyebrow {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mid); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.header-eyebrow::before {
+  content: ''; display: block;
+  width: 28px; height: 1px; background: var(--muted);
+}
+header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -1px;
+}
+header h1 span { color: var(--t1); }
+header p {
+  margin-top: 12px; font-size: 18px;
+  color: var(--mid); font-weight: 300;
+  font-style: italic; max-width: 560px;
+  line-height: 1.5;
+}
+.header-rule {
+  height: 1px; background: var(--border);
+  margin: 40px 64px 0;
+}
+
+/* ─── MAIN LAYOUT ─── */
+.page {
+  padding: 48px 64px 80px;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+/* ─── TIER BLOCK ─── */
+.tier {
+  position: relative;
+  border-radius: 16px;
+  padding: 36px 36px 32px;
+  margin-bottom: 0;
+  border: 1.5px solid var(--border);
+  transition: border-color .3s;
+  animation: fadeUp .6s ease both;
+}
+.tier:nth-child(1) { animation-delay: .1s; }
+.tier:nth-child(3) { animation-delay: .25s; }
+.tier:nth-child(5) { animation-delay: .4s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tier-t1 { background: var(--t1-dim); border-color: rgba(79,195,247,.3); }
+.tier-t2 { background: var(--t2-dim); border-color: rgba(168,237,172,.25); }
+.tier-t3 { background: var(--t3-dim); border-color: rgba(249,169,110,.28); }
+
+.tier:hover.tier-t1 { border-color: var(--t1); box-shadow: 0 0 40px var(--t1-glow); }
+.tier:hover.tier-t2 { border-color: var(--t2); box-shadow: 0 0 40px var(--t2-glow); }
+.tier:hover.tier-t3 { border-color: var(--t3); box-shadow: 0 0 40px var(--t3-glow); }
+
+/* tier badge */
+.tier-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2.5px;
+  padding: 4px 12px; border-radius: 20px;
+  margin-bottom: 16px;
+}
+.tier-t1 .tier-badge { background: rgba(79,195,247,.15); color: var(--t1); border: 1px solid rgba(79,195,247,.35); }
+.tier-t2 .tier-badge { background: rgba(168,237,172,.12); color: var(--t2); border: 1px solid rgba(168,237,172,.3); }
+.tier-t3 .tier-badge { background: rgba(249,169,110,.12); color: var(--t3); border: 1px solid rgba(249,169,110,.3); }
+
+.tier-badge .num {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800;
+}
+.tier-t1 .tier-badge .num { background: var(--t1); color: #0d0f14; }
+.tier-t2 .tier-badge .num { background: var(--t2); color: #0d0f14; }
+.tier-t3 .tier-badge .num { background: var(--t3); color: #0d0f14; }
+
+.tier-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -.4px; margin-bottom: 8px;
+}
+.tier-t1 .tier-title { color: var(--t1); }
+.tier-t2 .tier-title { color: var(--t2); }
+.tier-t3 .tier-title { color: var(--t3); }
+
+.tier-purpose {
+  font-size: 16px; font-weight: 300; font-style: italic;
+  color: var(--mid); line-height: 1.6;
+  max-width: 680px; margin-bottom: 28px;
+  border-left: 2px solid var(--muted);
+  padding-left: 14px;
+}
+
+/* ─── COMPONENTS GRID ─── */
+.components-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.component {
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: background .2s, border-color .2s, transform .2s;
+  cursor: default;
+}
+.component:hover {
+  background: rgba(255,255,255,.07);
+  transform: translateY(-2px);
+}
+.tier-t1 .component:hover { border-color: rgba(79,195,247,.5); }
+.tier-t2 .component:hover { border-color: rgba(168,237,172,.45); }
+.tier-t3 .component:hover { border-color: rgba(249,169,110,.45); }
+
+.comp-icon { font-size: 20px; margin-bottom: 6px; }
+.comp-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .3px; margin-bottom: 4px;
+  color: var(--white);
+}
+.comp-desc {
+  font-size: 12px; color: var(--mid);
+  line-height: 1.45;
+}
+
+/* ─── ARROW CONNECTOR ─── */
+.connector {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0; gap: 4px;
+  animation: fadeUp .5s ease both;
+}
+.connector:nth-of-type(2) { animation-delay: .2s; }
+.connector:nth-of-type(4) { animation-delay: .35s; }
+
+.conn-line {
+  width: 2px; height: 24px;
+  background: linear-gradient(to bottom, var(--muted), transparent);
+}
+.conn-arrow {
+  width: 0; height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+}
+.conn-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); margin-top: 4px;
+  text-align: center;
+}
+.connector-t1t2 .conn-line { background: linear-gradient(to bottom, var(--t1), var(--t2)); }
+.connector-t1t2 .conn-arrow { border-top: 9px solid var(--t2); }
+.connector-t2t3 .conn-line { background: linear-gradient(to bottom, var(--t2), var(--t3)); }
+.connector-t2t3 .conn-arrow { border-top: 9px solid var(--t3); }
+
+/* ─── LAYER DESCRIPTION CARDS ─── */
+.descriptions {
+  margin-top: 56px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  animation: fadeUp .6s ease both;
+  animation-delay: .5s;
+}
+.desc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px 24px;
+  transition: border-color .25s;
+}
+.desc-card:hover { border-color: var(--muted); }
+.desc-card-eyebrow {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.desc-t1 { color: var(--t1); }
+.desc-t2 { color: var(--t2); }
+.desc-t3 { color: var(--t3); }
+
+.desc-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 800;
+  margin-bottom: 12px;
+}
+.desc-t1-h { color: var(--t1); }
+.desc-t2-h { color: var(--t2); }
+.desc-t3-h { color: var(--t3); }
+
+.desc-card p {
+  font-size: 15px; line-height: 1.7;
+  color: #a0a8be; font-weight: 300;
+}
+
+/* ─── FOOTER LEGEND ─── */
+.legend {
+  margin-top: 48px;
+  display: flex; flex-wrap: wrap; gap: 24px; align-items: center;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  animation: fadeUp .6s ease both; animation-delay: .7s;
+}
+.legend-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--muted);
+}
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 3px;
+}
+.legend-item span {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; color: var(--mid);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 720px) {
+  header, .page { padding-left: 24px; padding-right: 24px; }
+  .header-rule { margin-left: 24px; margin-right: 24px; }
+  .components-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">LinkedIn MVP · Chapter 4 Deliverable</div>
+  <h1><span>Three-Tier</span><br>Architecture Design</h1>
+  <p>A visual breakdown of how LinkedIn is structured — from what users see, to the logic that runs it, to where all the data lives.</p>
+</header>
+<div class="header-rule"></div>
+
+<main class="page">
+
+  <!-- ══════════════ TIER 1 ══════════════ -->
+  <div class="tier tier-t1">
+    <div class="tier-badge"><div class="num">1</div>Presentation Tier</div>
+    <div class="tier-title">User Interface Layer</div>
+    <div class="tier-purpose">
+      This is everything a user sees and touches — the screens, buttons, search bars, feeds, and forms. It's the "face" of LinkedIn that runs inside your web browser or mobile app.
+    </div>
+
+    <div class="components-grid">
+      <div class="component">
+        <div class="comp-icon">🏠</div>
+        <div class="comp-name">Home Feed</div>
+        <div class="comp-desc">Displays posts, job nudges, and network activity in real time</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">👤</div>
+        <div class="comp-name">Profile Page</div>
+        <div class="comp-desc">Shows a user's digital resume — experience, skills, photo</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🔍</div>
+        <div class="comp-name">Job Search UI</div>
+        <div class="comp-desc">Search bar, filters, and results list for finding jobs</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">💬</div>
+        <div class="comp-name">Messaging UI</div>
+        <div class="comp-desc">Chat inbox and conversation window between users</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🎓</div>
+        <div class="comp-name">Learning Portal</div>
+        <div class="comp-desc">Course cards, progress bars, and certificate display</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">📋</div>
+        <div class="comp-name">Recruiter Dashboard</div>
+        <div class="comp-desc">Candidate lists, filters, and hiring pipeline screens</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🔔</div>
+        <div class="comp-name">Notifications Panel</div>
+        <div class="comp-desc">Alerts for connection requests, job matches, and messages</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🪄</div>
+        <div class="comp-name">Onboarding Wizard</div>
+        <div class="comp-desc">Step-by-step setup screens for new user profile creation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR 1 → 2 -->
+  <div class="connector connector-t1t2">
+    <div class="conn-line"></div>
+    <div class="conn-arrow"></div>
+    <div class="conn-label">User actions & API requests ↕ responses & data</div>
+  </div>
+
+  <!-- ══════════════ TIER 2 ══════════════ -->
+  <div class="tier tier-t2">
+    <div class="tier-badge"><div class="num">2</div>Application Tier</div>
+    <div class="tier-title">Business Logic Layer</div>
+    <div class="tier-purpose">
+      This is the "brain" behind LinkedIn — the rules, processes, and intelligence that decide what happens when you click something. It handles things like matching you to jobs, checking your login, and deciding what posts show in your feed.
+    </div>
+
+    <div class="components-grid">
+      <div class="component">
+        <div class="comp-icon">🔐</div>
+        <div class="comp-name">Auth Service</div>
+        <div class="comp-desc">Handles sign-up, login, and password security</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🤖</div>
+        <div class="comp-name">AI Recommendation Engine</div>
+        <div class="comp-desc">Matches users to jobs and calculates % match scores</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">📊</div>
+        <div class="comp-name">Profile Strength Scorer</div>
+        <div class="comp-desc">Calculates profile completeness and gives improvement tips</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">📬</div>
+        <div class="comp-name">Messaging Service</div>
+        <div class="comp-desc">Routes messages between users and manages notifications</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">📢</div>
+        <div class="comp-name">Feed Algorithm</div>
+        <div class="comp-desc">Decides which posts appear in each user's home feed</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">💼</div>
+        <div class="comp-name">Job Matching Logic</div>
+        <div class="comp-desc">Applies filters, ranks listings, and surfaces relevant jobs</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🎯</div>
+        <div class="comp-name">Recruiter Search Engine</div>
+        <div class="comp-desc">Filters and ranks candidates based on recruiter criteria</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">📡</div>
+        <div class="comp-name">API Gateway</div>
+        <div class="comp-desc">The bridge that connects the UI to all back-end services</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR 2 → 3 -->
+  <div class="connector connector-t2t3">
+    <div class="conn-line"></div>
+    <div class="conn-arrow"></div>
+    <div class="conn-label">Read & write requests ↕ stored data returned</div>
+  </div>
+
+  <!-- ══════════════ TIER 3 ══════════════ -->
+  <div class="tier tier-t3">
+    <div class="tier-badge"><div class="num">3</div>Data Tier</div>
+    <div class="tier-title">Data Storage Layer</div>
+    <div class="tier-purpose">
+      This is LinkedIn's long-term memory — where all profiles, messages, job listings, connections, and course records are stored safely. Nothing is lost between sessions because it all lives here.
+    </div>
+
+    <div class="components-grid">
+      <div class="component">
+        <div class="comp-icon">🗄️</div>
+        <div class="comp-name">User Database</div>
+        <div class="comp-desc">Stores all profile info — name, skills, experience, photo</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">💼</div>
+        <div class="comp-name">Jobs Database</div>
+        <div class="comp-desc">All active job postings, company info, and application data</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">💬</div>
+        <div class="comp-name">Messages Store</div>
+        <div class="comp-desc">History of every conversation and InMail sent on the platform</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🔗</div>
+        <div class="comp-name">Connections Graph</div>
+        <div class="comp-desc">Stores the network map of who is connected to whom</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🎓</div>
+        <div class="comp-name">Learning Records</div>
+        <div class="comp-desc">Course progress, completions, and earned certificates</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">📈</div>
+        <div class="comp-name">Analytics Store</div>
+        <div class="comp-desc">Tracks profile views, job clicks, and engagement metrics</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">🔒</div>
+        <div class="comp-name">Auth & Security Store</div>
+        <div class="comp-desc">Encrypted passwords, tokens, and login session data</div>
+      </div>
+      <div class="component">
+        <div class="comp-icon">☁️</div>
+        <div class="comp-name">Media / File Storage</div>
+        <div class="comp-desc">Profile photos, uploaded resumes, videos, and documents</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ LAYER DESCRIPTIONS ══════════════ -->
+  <div class="descriptions">
+
+    <div class="desc-card">
+      <div class="desc-card-eyebrow desc-t1">Layer 1 · Presentation Tier</div>
+      <h3 class="desc-t1-h">What the User Sees</h3>
+      <p>The Presentation Tier is the part of LinkedIn that users directly interact with — the screens, menus, buttons, and forms displayed in a web browser or mobile app. It is responsible for collecting input from the user (like a job search query or a new profile update) and displaying the results in a clear, visual format. This layer never stores or processes data on its own; it simply passes requests along and shows back what it receives.</p>
+    </div>
+
+    <div class="desc-card">
+      <div class="desc-card-eyebrow desc-t2">Layer 2 · Application Tier</div>
+      <h3 class="desc-t2-h">Where the Thinking Happens</h3>
+      <p>The Application Tier is LinkedIn's decision-making engine — it processes every action a user takes and figures out what to do with it. For example, when a user searches for a job, this layer applies the matching rules, runs the AI recommendation logic, and decides which results are most relevant before sending them back to the screen. It acts as the middleman between what the user sees and where data is stored, enforcing all the platform's business rules along the way.</p>
+    </div>
+
+    <div class="desc-card">
+      <div class="desc-card-eyebrow desc-t3">Layer 3 · Data Tier</div>
+      <h3 class="desc-t3-h">Where Everything is Stored</h3>
+      <p>The Data Tier is LinkedIn's permanent storage system — it holds every piece of information on the platform, from user profiles and job listings to messages and course records. When the Application Tier needs to look something up or save something new, it sends a request to this layer. This tier ensures that all data is stored securely, backed up reliably, and returned quickly whenever it is needed, so nothing is ever lost between user sessions.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ LEGEND ══════════════ -->
+  <div class="legend">
+    <span class="legend-title">Legend</span>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t1)"></div><span>Presentation (UI) Tier</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t2)"></div><span>Application (Logic) Tier</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t3)"></div><span>Data (Storage) Tier</span></div>
+    <div class="legend-item" style="margin-left:auto">
+      <span style="font-family:'Syne',sans-serif;font-size:11px;color:var(--muted)">LinkedIn MVP · Architecture Design · Chapter 4</span>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>
